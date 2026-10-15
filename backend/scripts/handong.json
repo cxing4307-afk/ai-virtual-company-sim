@@ -1,0 +1,282 @@
+{
+  "_comment": "剧本配置 v1：所有工程数字均为教学示意，calibration 字段必须保留‘待校准’；新增剧本时沿用同一结构即可。",
+  "id": "handong",
+  "title": "寒冬订单",
+  "company": "北寒公交运营有限公司",
+  "background": "-25℃的北方冬天，50 辆氢燃料电池公交车续航从 400km 跌到约 220km。你要在 30 天、120 万预算内交出冬季保障方案。",
+  "duration": "30–45 分钟",
+  "roles": [
+    {
+      "id": "方案",
+      "title": "方案工程师",
+      "opening": "拿到全部投诉记录和甲方通牒，牵头交付完整方案。",
+      "information": [
+        "投诉记录",
+        "甲方通牒"
+      ]
+    },
+    {
+      "id": "测试",
+      "title": "测试工程师",
+      "opening": "手里有入冬前后的实测数据与衰减曲线，先定位主因。",
+      "information": [
+        "入冬前后实测数据",
+        "衰减曲线"
+      ]
+    },
+    {
+      "id": "质检",
+      "title": "质检工程师",
+      "opening": "手里有三家供应商部件质检报告，判断问题出在哪里。",
+      "information": [
+        "三家供应商部件质检报告"
+      ]
+    }
+  ],
+  "rules": {
+    "_comment": "金额单位万元、工期单位天；metric.direction=min 表示至少达到目标，max 表示不得高于目标。",
+    "budgetLimit": 120,
+    "scheduleLimit": 30,
+    "clientTrust": 60,
+    "calibration": "待校准",
+    "metric": {
+      "key": "rangeKm",
+      "name": "续航",
+      "unit": "km",
+      "initial": 220,
+      "target": 300,
+      "direction": "min",
+      "calibration": "待校准"
+    },
+    "financeWarningThreshold": 120,
+    "clientPressureThreshold": 30,
+    "clientTrustPenalty": 20,
+    "ineffectiveTurnThreshold": 3,
+    "eventsCalibration": "待校准"
+  },
+  "routes": [
+    {
+      "id": "preheat",
+      "action": "choose_preheat",
+      "label": "驻车预热",
+      "description": "驻车预热：约 90 万、20 天",
+      "budget": 90,
+      "schedule": 20,
+      "metricChange": 120,
+      "flag": "preheatApplied",
+      "calibration": "待校准"
+    },
+    {
+      "id": "insulation",
+      "action": "choose_insulation",
+      "label": "整车保温",
+      "description": "整车保温：约 45 万、7 天",
+      "budget": 45,
+      "schedule": 7,
+      "metricChange": 40,
+      "flag": "insulationApplied",
+      "calibration": "待校准"
+    }
+  ],
+  "specialActions": [
+    {
+      "action": "visit_workshop",
+      "label": "下车间",
+      "flag": "workshopVisited",
+      "information": "土办法",
+      "metricChange": 15,
+      "calibration": "待校准"
+    }
+  ],
+  "acts": [
+    {
+      "number": 1,
+      "name": "接单",
+      "durationMs": 600000,
+      "hint": "先确认问题、预算与工期三条红线。",
+      "advance": "问题、预算、工期均确认，或超时",
+      "calibration": "待校准"
+    },
+    {
+      "number": 2,
+      "name": "调研",
+      "durationMs": 1200000,
+      "hint": "调研阶段：找对人、问对问题，并选择可执行路线。",
+      "advance": "提交方案，或超时",
+      "calibration": "待校准"
+    },
+    {
+      "number": 3,
+      "name": "交方案",
+      "durationMs": 0,
+      "hint": "提交路线、成本、工期和风险预案。",
+      "advance": "结算"
+    }
+  ],
+  "dialogTopics": [
+    {
+      "topic": "problem",
+      "pattern": "衰减|续航|原因|故障|电堆|低温"
+    },
+    {
+      "topic": "budget",
+      "pattern": "预算|成本|报价|多少钱|费用|花费"
+    },
+    {
+      "topic": "schedule",
+      "pattern": "工期|交期|多久|几天|进度"
+    }
+  ],
+  "npcs": [
+    {
+      "id": "wang_manager",
+      "cardId": "handong-wang-manager",
+      "aliases": [
+        "王经理",
+        "NPC-01"
+      ],
+      "visibleFields": [
+        "currentAct",
+        "schedule",
+        "clientTrust",
+        "metric",
+        "contract"
+      ]
+    },
+    {
+      "id": "li_engineer",
+      "cardId": "handong-li-engineer",
+      "aliases": [
+        "李工",
+        "NPC-02"
+      ],
+      "visibleFields": [
+        "currentAct",
+        "schedule",
+        "clientTrust",
+        "metric",
+        "unlockedInformation"
+      ]
+    },
+    {
+      "id": "zhang_ceo",
+      "cardId": "handong-zhang-ceo",
+      "aliases": [
+        "张总",
+        "NPC-03"
+      ],
+      "visibleFields": [
+        "currentAct",
+        "schedule",
+        "clientTrust",
+        "unlockedInformationWithoutMetric"
+      ]
+    },
+    {
+      "id": "chen_accountant",
+      "cardId": "handong-chen-accountant",
+      "aliases": [
+        "陈会计",
+        "NPC-04"
+      ],
+      "visibleFields": [
+        "budget"
+      ]
+    },
+    {
+      "id": "zhao_supervisor",
+      "cardId": "handong-zhao-supervisor",
+      "aliases": [
+        "赵主管",
+        "NPC-05"
+      ],
+      "visibleFields": [
+        "currentAct",
+        "budget",
+        "schedule",
+        "clientTrust"
+      ]
+    },
+    {
+      "id": "liu_foreman",
+      "cardId": "handong-liu-foreman",
+      "aliases": [
+        "刘班长",
+        "NPC-06"
+      ],
+      "visibleFields": [
+        "currentAct",
+        "workshopVisited",
+        "workshopInformation"
+      ]
+    }
+  ],
+  "evaluationDimensions": [
+    {
+      "name": "问题定位",
+      "definition": "是否先搞清目标指标变化幅度和主因，再讨论方案。"
+    },
+    {
+      "name": "信息优先级",
+      "definition": "提问顺序、是否识别销售偏见、是否进入一线现场。"
+    },
+    {
+      "name": "约束意识",
+      "definition": "是否始终同时考虑预算与工期红线。"
+    },
+    {
+      "name": "甲方管理",
+      "definition": "是否主动确认甲方真实意图并管理预期。"
+    },
+    {
+      "name": "方案完整度",
+      "definition": "技术路线、成本、工期和风险预案是否齐备。"
+    },
+    {
+      "name": "尝试次数",
+      "definition": "是否进行了足够的访谈、调研和方案验证。"
+    }
+  ],
+  "calibrationItems": [
+    "电堆 -20℃ 衰减比例、预热模块价格/交期/效果",
+    "保温改造成本、施工周期、续航提升比例",
+    "氢瓶阀保温套、暖库停车数据",
+    "预算与罚款量级",
+    "岗位设置"
+  ],
+  "directorCardId": "handong-dm",
+  "world_info": [
+    {
+      "id": "fine-purpose",
+      "keywords": [
+        "罚款",
+        "扣款"
+      ],
+      "npcIds": [
+        "wang_manager"
+      ],
+      "content": "隐藏线：罚款是手段，不是目的；只有学生主动探询合作意愿时才逐步松口。"
+    },
+    {
+      "id": "supplier-floor",
+      "keywords": [
+        "底价",
+        "压价"
+      ],
+      "npcIds": [
+        "li_engineer"
+      ],
+      "content": "谈判边界：学生用其他报价压价时，价格最多可松动 10%，不要主动暴露底价。"
+    }
+  ],
+  "director_dispatch": [
+    {
+      "eventType": "client_pressure",
+      "npcId": "wang_manager"
+    },
+    {
+      "eventType": "finance_warning",
+      "npcId": "chen_accountant"
+    }
+  ]
+}
