@@ -1,0 +1,248 @@
+{
+  "_comment": "第二个纯 JSON 剧本示例。所有数字均为教学示意，保留待校准标记；没有专用引擎代码。",
+  "id": "gaowen",
+  "title": "高温订单",
+  "company": "鲜达冷链有限公司",
+  "background": "连续高温导致生鲜配送车制冷不足，当前货损率约 6%。你要在 30 天、120 万预算内把货损率控制到 2% 以内。",
+  "duration": "30–45 分钟",
+  "roles": [
+    {
+      "id": "方案",
+      "title": "方案工程师",
+      "opening": "拿到客户投诉与配送时段表，牵头形成降损方案。",
+      "information": [
+        "客户投诉",
+        "配送时段表"
+      ]
+    },
+    {
+      "id": "测试",
+      "title": "测试工程师",
+      "opening": "掌握车厢温度曲线和货损抽检数据，先定位热源。",
+      "information": [
+        "车厢温度曲线",
+        "货损抽检数据"
+      ]
+    },
+    {
+      "id": "质检",
+      "title": "质检工程师",
+      "opening": "掌握制冷机组和保温层检验记录，判断薄弱环节。",
+      "information": [
+        "制冷机组检验记录",
+        "保温层检验记录"
+      ]
+    }
+  ],
+  "rules": {
+    "_comment": "货损率越低越好，因此 direction=max，表示最终值不得高于 target。",
+    "budgetLimit": 120,
+    "scheduleLimit": 30,
+    "clientTrust": 60,
+    "calibration": "待校准",
+    "metric": {
+      "key": "cargoLossRate",
+      "name": "货损率",
+      "unit": "%",
+      "initial": 6,
+      "target": 2,
+      "direction": "max",
+      "calibration": "待校准"
+    },
+    "financeWarningThreshold": 120,
+    "clientPressureThreshold": 30,
+    "clientTrustPenalty": 20,
+    "ineffectiveTurnThreshold": 3,
+    "eventsCalibration": "待校准"
+  },
+  "routes": [
+    {
+      "id": "cooling",
+      "action": "choose_cooling",
+      "label": "大功率制冷机组",
+      "description": "更换大功率制冷机组：约 90 万、20 天",
+      "budget": 90,
+      "schedule": 20,
+      "metricChange": -4.5,
+      "flag": "coolingApplied",
+      "calibration": "待校准"
+    },
+    {
+      "id": "insulation_offpeak",
+      "action": "choose_insulation_offpeak",
+      "label": "保温与错峰",
+      "description": "车厢保温＋错峰配送：约 45 万、7 天",
+      "budget": 45,
+      "schedule": 7,
+      "metricChange": -2.5,
+      "flag": "insulationOffpeakApplied",
+      "calibration": "待校准"
+    }
+  ],
+  "specialActions": [
+    {
+      "action": "visit_workshop",
+      "label": "跟车检查",
+      "flag": "workshopVisited",
+      "information": "开门频次记录",
+      "metricChange": -0.5,
+      "calibration": "待校准"
+    }
+  ],
+  "acts": [
+    {
+      "number": 1,
+      "name": "接单",
+      "durationMs": 600000,
+      "hint": "先确认货损问题、预算与工期三条红线。",
+      "advance": "问题、预算、工期均确认，或超时",
+      "calibration": "待校准"
+    },
+    {
+      "number": 2,
+      "name": "调研",
+      "durationMs": 1200000,
+      "hint": "调研温控、装卸和配送时段，并选择路线。",
+      "advance": "提交方案，或超时",
+      "calibration": "待校准"
+    },
+    {
+      "number": 3,
+      "name": "交方案",
+      "durationMs": 0,
+      "hint": "提交路线、成本、工期和风险预案。",
+      "advance": "结算"
+    }
+  ],
+  "dialogTopics": [
+    {
+      "topic": "problem",
+      "pattern": "货损|温度|制冷|原因|故障|高温"
+    },
+    {
+      "topic": "budget",
+      "pattern": "预算|成本|报价|多少钱|费用|花费"
+    },
+    {
+      "topic": "schedule",
+      "pattern": "工期|交期|多久|几天|进度"
+    }
+  ],
+  "npcs": [
+    {
+      "id": "client_dispatcher",
+      "cardId": "gaowen-client-dispatcher",
+      "aliases": [
+        "周调度",
+        "NPC-01"
+      ],
+      "visibleFields": [
+        "currentAct",
+        "schedule",
+        "clientTrust",
+        "metric",
+        "contract"
+      ]
+    },
+    {
+      "id": "cooling_supplier",
+      "cardId": "gaowen-cooling-supplier",
+      "aliases": [
+        "孙工",
+        "NPC-02"
+      ],
+      "visibleFields": [
+        "currentAct",
+        "schedule",
+        "clientTrust",
+        "metric",
+        "unlockedInformation"
+      ]
+    },
+    {
+      "id": "driver_foreman",
+      "cardId": "gaowen-driver-foreman",
+      "aliases": [
+        "吴班长",
+        "NPC-03"
+      ],
+      "visibleFields": [
+        "currentAct",
+        "workshopVisited",
+        "workshopInformation"
+      ]
+    },
+    {
+      "id": "finance",
+      "cardId": "gaowen-finance",
+      "aliases": [
+        "何会计",
+        "NPC-04"
+      ],
+      "visibleFields": [
+        "budget"
+      ]
+    }
+  ],
+  "evaluationDimensions": [
+    {
+      "name": "问题定位",
+      "definition": "是否先确认货损表现和主要热源。"
+    },
+    {
+      "name": "信息优先级",
+      "definition": "是否交叉核实温控数据、供应商说法和司机现场经验。"
+    },
+    {
+      "name": "约束意识",
+      "definition": "是否同时考虑预算和工期。"
+    },
+    {
+      "name": "甲方管理",
+      "definition": "是否确认门店时段与甲方真实诉求。"
+    },
+    {
+      "name": "方案完整度",
+      "definition": "路线、成本、工期和风险预案是否齐备。"
+    },
+    {
+      "name": "尝试次数",
+      "definition": "是否进行了足够的访谈、跟车和验证。"
+    }
+  ],
+  "directorCardId": "gaowen-dm",
+  "world_info": [
+    {
+      "id": "night-window",
+      "keywords": [
+        "夜间",
+        "错峰"
+      ],
+      "npcIds": [
+        "client_dispatcher"
+      ],
+      "content": "隐藏线：部分门店存在夜间收货窗口，但要学生主动提出配送调整才说明。"
+    },
+    {
+      "id": "cooling-price",
+      "keywords": [
+        "底价",
+        "压价"
+      ],
+      "npcIds": [
+        "cooling_supplier"
+      ],
+      "content": "商务边界：可以讨论批量报价，但必须先确认技术工况，不能用价格替代效果判断。"
+    }
+  ],
+  "director_dispatch": [
+    {
+      "eventType": "client_pressure",
+      "npcId": "client_dispatcher"
+    },
+    {
+      "eventType": "finance_warning",
+      "npcId": "finance"
+    }
+  ]
+}
