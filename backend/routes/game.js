@@ -5,6 +5,7 @@ import { Router } from "express";
 import { EVENT_TYPES, createEvent } from "../engine/events.js";
 import { applyAction } from "../engine/rules.js";
 import { buildReview } from "../engine/review.js";
+import { suggestScores } from "../engine/rubric.js";
 import { createInitialState, getOpeningData } from "../engine/state.js";
 import { getScript, listScripts } from "../scripts/loader.js";
 
@@ -59,6 +60,49 @@ router.post("/review", (req, res) => {
   const state = findGame(req, res);
   if (!state) return undefined;
   return res.json(buildReview(state, req.body?.dimensions ?? []));
+});
+
+/** 校验教师复核接口共用的对局编号，避免回退到最近一局。 */
+function findTeacherReviewGame(req, res) {
+  if (typeof req.body?.gameId !== "string" || !req.body.gameId.trim()) {
+    res.status(400).json({ error: "gameId 必须为非空字符串" });
+    return null;
+  }
+  return findGame(req, res);
+}
+
+/** 返回规则引擎生成的建议分，以及本局已经留下的教师复核历史。 */
+router.post("/teacher-review-score", (req, res) => {
+  const state = findTeacherReviewGame(req, res);
+  if (!state) return undefined;
+  return res.json({ dimensions: suggestScores(state), teacherReviews: state.teacherReviews ?? {} });
+});
+
+/** 确认或调整建议分；历史只追加，绝不改写规则引擎的原始建议。 */
+router.post("/teacher-review-confirm", (req, res) => {
+  const state = findTeacherReviewGame(req, res);
+  if (!state) return undefined;
+
+  const { dimensionKey, action, score, note } = req.body ?? {};
+  const dimension = suggestScores(state).find((item) => item.key === dimensionKey);
+  if (!dimension) return res.status(400).json({ error: "dimensionKey 无效" });
+  if (action !== "confirm" && action !== "adjust") return res.status(400).json({ error: "action 必须为 confirm 或 adjust" });
+  if (action === "adjust" && (!Number.isInteger(score) || score < 0 || score > 100)) {
+    return res.status(400).json({ error: "改分时 score 必须为 0—100 的整数" });
+  }
+  if (note !== undefined && typeof note !== "string") return res.status(400).json({ error: "note 必须为字符串" });
+
+  const teacherReview = {
+    action,
+    originalScore: dimension.score,
+    finalScore: action === "adjust" ? score : dimension.score,
+    note: note?.trim() ?? "",
+    time: new Date().toISOString(),
+  };
+  state.teacherReviews ??= {};
+  state.teacherReviews[dimensionKey] ??= [];
+  state.teacherReviews[dimensionKey].push(teacherReview);
+  return res.json({ teacherReview, teacherReviews: state.teacherReviews });
 });
 
 router.post("/action", (req, res) => {
