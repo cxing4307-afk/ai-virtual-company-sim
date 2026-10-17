@@ -1,5 +1,10 @@
 # 更新日志
 
+## 2026-10-17
+
+### 新增
+- 为引擎事件模块（`backend/engine/events.js`）补 5 项单元测试（`backend/engine/events.test.js`）：6 个事件类型常量冻结契约、`createEvent` 结构化契约（只含 type/data、data 默认 {}），`npm test` 44/44 全过。
+
 ## 2026-10-16
 
 ### 新增
