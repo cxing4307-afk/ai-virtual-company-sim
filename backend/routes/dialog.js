@@ -1,6 +1,8 @@
 import { Router } from "express";
 
 import { applyAction } from "../engine/rules.js";
+import { detectOffTopic } from "../engine/dmcontrol.js";
+import { createEvent, EVENT_TYPES } from "../engine/events.js";
 import { findWorldInfo, renderWorldInfo } from "../engine/worldinfo.js";
 import { requestChat } from "../gateway/deepseek.js";
 import { renderDmPrompt } from "../prompts/dm.js";
@@ -56,6 +58,18 @@ function validateGame(gameId, res) {
     return null;
   }
   return state;
+}
+
+function offTopicIntervention(result) {
+  if (!result.level) return null;
+  const actions = { 1: "gentle_redirect", 2: "structured_redirect", 3: "firm_redirect" };
+  return createEvent(EVENT_TYPES.DM_INTERVENTION, {
+    priority: result.level === 3 ? "high" : "low",
+    trigger: `off_topic_level_${result.level}`,
+    action: actions[result.level],
+    stateChange: { offTopicLevel: result.level, reason: result.reason },
+    scoreImpact: "none",
+  });
 }
 
 /**
@@ -120,7 +134,13 @@ export function createDialogRouter({ requestChatFn = requestChat } = {}) {
     if (history.length > MAX_HISTORY_TURNS) history.splice(0, history.length - MAX_HISTORY_TURNS);
     const action = actionForDialog(message, npcId, state.scriptId);
     const actionResult = applyAction(state, action);
-    return res.json({ reply, mapped: action.type === "ask", ...actionResult });
+    const dialogRounds = state.behaviorRecords
+      .filter((record) => record.type === "ask" || record.type === "dialog")
+      .map((record) => ({ text: record.contentSummary, isEffective: record.type === "ask" }));
+    const offTopic = detectOffTopic(dialogRounds, { afterPullback: state.flags.offTopicPullbackIssued });
+    if (offTopic.level >= 2) state.flags.offTopicPullbackIssued = true;
+    const intervention = offTopicIntervention(offTopic);
+    return res.json({ reply, mapped: action.type === "ask", offTopic, ...actionResult, events: intervention ? [...actionResult.events, intervention] : actionResult.events });
   });
 
   router.post("/dm", async (req, res) => {

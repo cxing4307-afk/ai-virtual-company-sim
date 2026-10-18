@@ -70,7 +70,7 @@ test("衰减原因提问映射为问题确认动作并返回最新状态与事�
   assert.equal(getGameState(game.body.gameId).behaviorRecords.at(-1).type, "ask");
 });
 
-test("未映射对话仍返回状态、事件与未映射标志", async () => {
+test("未映射跑题对话返回状态、一级拉回事件与未映射标志", async () => {
   const gatewayFetchMock = async () => new Response(JSON.stringify({ choices: [{ message: { content: "我们先聚焦项目本身。" } }] }), { status: 200 });
   const requestChatFn = (options) => requestChat({ ...options, apiKey: "测试密钥", fetchImpl: gatewayFetchMock });
   const dialogRouter = createDialogRouter({ requestChatFn });
@@ -85,7 +85,25 @@ test("未映射对话仍返回状态、事件与未映射标志", async () => {
   assert.equal(dialog.status, 200);
   assert.equal(dialog.body.mapped, false);
   assert.equal(dialog.body.state.gameId, game.body.gameId);
-  assert.deepEqual(dialog.body.events, []);
+  assert.equal(dialog.body.offTopic.level, 1);
+  assert.equal(dialog.body.events.at(-1).type, "dm_intervention");
+});
+
+test("跑题三级拉回由服务端判定，求助和新约束不触发", async () => {
+  const requestChatFn = async () => ({ status: 200, body: { choices: [{ message: { content: "请继续。" } }] } });
+  const dialogRouter = createDialogRouter({ requestChatFn });
+  const game = await post(gameRouter, "/new", { role: "方案" });
+  const request = (message) => post(dialogRouter, "/dialog", { gameId: game.body.gameId, npcId: "wang_manager", message });
+
+  const first = await request("今天天气如何？");
+  const second = await request("聊聊游戏吧");
+  const third = await request("最近有什么电影？");
+  assert.equal(first.body.offTopic.level, 1);
+  assert.equal(second.body.offTopic.level, 2);
+  assert.equal(third.body.offTopic.level, 3);
+  assert.equal(third.body.events.at(-1).type, "dm_intervention");
+  assert.equal((await request("规则是什么意思？")).body.offTopic.exempt, true);
+  assert.equal((await request("刚发现一个新约束条件")).body.offTopic.exempt, true);
 });
 
 test("网关失败时对话接口返回 502 中文错误", async () => {
