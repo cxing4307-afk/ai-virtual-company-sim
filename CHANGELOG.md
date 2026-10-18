@@ -1,5 +1,10 @@
 # 更新日志
 
+## 2026-10-18
+
+### 新增
+- 为引擎规则模块（`backend/engine/rules.js` 的 `applyAction`）补 10 项单元测试（`backend/engine/rules.test.js`）：非法 action/已结算拦截、ask 澄清三类旗标、无效回合累计与导演提醒（同阈值只提醒一次）、特殊行动解锁信息幂等、客户施压与财务警告各只触发一次、行动快照与决策/行为记录；同时把新测试文件加入 `package.json` 的 `test` 脚本。`npm test` 54/54 全过。
+
 ## 2026-10-17
 
 ### 新增
