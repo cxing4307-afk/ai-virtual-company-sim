@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 const cardsDirectory = path.join(directory, "cards");
+const seedsPath = path.join(directory, "seeds.json");
 const cardStringFields = ["_comment", "id", "name", "身份", "目标", "性格", "语言风格", "开场白"];
 
 const nonEmptyStrings = (value) => Array.isArray(value) && value.length > 0 && value.every((item) => typeof item === "string" && item.trim());
@@ -41,7 +42,7 @@ export function getCard(cardId) {
 
 const scripts = new Map(
   fs.readdirSync(directory)
-    .filter((name) => name.endsWith(".json"))
+    .filter((name) => name.endsWith(".json") && name !== "seeds.json")
     .sort()
     .map((name) => {
       const raw = JSON.parse(fs.readFileSync(path.join(directory, name), "utf8"));
@@ -57,6 +58,8 @@ const scripts = new Map(
       return [script.id, Object.freeze(script)];
     }),
 );
+
+const seeds = JSON.parse(fs.readFileSync(seedsPath, "utf8"));
 
 export function validateScriptReferences(script) {
   const npcIds = script.npcs?.map((npc) => npc.id) ?? [];
@@ -82,5 +85,30 @@ export function getScript(scriptId = DEFAULT_SCRIPT_ID) {
 
 /** 首页只需要轻量元信息，避免把 NPC 提示词发送到浏览器。 */
 export function listScripts() {
-  return [...scripts.values()].sort((a, b) => (a.id === DEFAULT_SCRIPT_ID ? -1 : b.id === DEFAULT_SCRIPT_ID ? 1 : 0)).map(({ id, title, background, company, duration, roles }) => ({ id, title, background, company, duration, roles }));
+  const playable = [...scripts.values()]
+    .sort((a, b) => (a.id === DEFAULT_SCRIPT_ID ? -1 : b.id === DEFAULT_SCRIPT_ID ? 1 : 0))
+    .map(({ id, title, background, company, duration, tagline, tags, difficulty, roles, npcs }) => ({ id, title, background, company, duration, tagline, tags, difficulty, roles, npcCount: npcs.length }));
+  return [...playable, ...seeds.map(({ id, title, tagline, tags, 来源说明 }) => ({ id, title, tagline, tags, sourceNote: 来源说明, draft: true }))];
+}
+
+/** 剧本中心详情的严格白名单；绝不把角色卡、World Info 或 NPC 配置送至浏览器。 */
+export function getScriptDetail(scriptId) {
+  const script = scripts.get(scriptId);
+  if (script) {
+    const { title, background, company, duration, tagline, tags, difficulty } = script;
+    return {
+      title,
+      background,
+      company,
+      duration,
+      tagline,
+      tags,
+      difficulty,
+      roles: script.roles.map(({ id, title: roleTitle, opening }) => ({ id, title: roleTitle, opening })),
+      npcs: script.npcs.map(({ name }) => ({ name })),
+    };
+  }
+  const seed = seeds.find((item) => item.id === scriptId);
+  if (seed) return { title: seed.title, tagline: seed.tagline, tags: seed.tags, sourceNote: seed.来源说明, draft: true, roles: [], npcs: [] };
+  throw new Error(`未知剧本：${scriptId}`);
 }

@@ -6,7 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import gameRouter from "../routes/game.js";
-import { getCard, getScript, listScripts, validateCard, validateScriptReferences } from "./loader.js";
+import { getCard, getScript, getScriptDetail, listScripts, validateCard, validateScriptReferences } from "./loader.js";
 
 const directory = path.dirname(fileURLToPath(import.meta.url));
 
@@ -20,10 +20,31 @@ async function postNew(body) {
   return response;
 }
 
-test("剧本加载接口启动时读入两个可选剧本", () => {
+test("剧本加载接口提供可运行剧本及数据驱动的社区种子", () => {
   const scripts = listScripts();
-  assert.deepEqual(scripts.map((script) => script.id), ["handong", "gaowen"]);
-  assert.deepEqual(scripts.map((script) => script.title), ["寒冬订单", "高温订单"]);
+  assert.deepEqual(scripts.map((script) => script.id), ["handong", "gaowen", "month-end-variance"]);
+  assert.deepEqual(scripts.slice(0, 2).map((script) => script.title), ["寒冬订单", "高温订单"]);
+  assert.deepEqual(listScripts()[0].tags, ["制造业", "冬季运营"]);
+  assert.equal(listScripts()[0].difficulty, "入门");
+  assert.equal(listScripts()[0].npcCount, getScript("handong").npcs.length);
+  assert.equal(scripts.at(-1).draft, true);
+  assert.match(scripts.at(-1).sourceNote, /社区种子草稿/);
+});
+
+test("剧本详情只投影剧本中心所需字段，不泄露角色卡或 World Info", () => {
+  const detail = getScriptDetail("handong");
+  assert.deepEqual(Object.keys(detail).sort(), ["background", "company", "difficulty", "duration", "npcs", "roles", "tagline", "tags", "title"]);
+  assert.deepEqual(Object.keys(detail.roles[0]).sort(), ["id", "opening", "title"]);
+  assert.deepEqual(Object.keys(detail.npcs[0]), ["name"]);
+  const serialized = JSON.stringify(detail);
+  for (const forbidden of ["identity", "知识边界", "红线", "示例对话", "目标", "world_info", "visibleFields", "cardId"]) assert.ok(!serialized.includes(forbidden), `详情不应包含 ${forbidden}`);
+});
+
+test("社区种子详情可查看但保持草稿状态", () => {
+  const detail = getScriptDetail("month-end-variance");
+  assert.equal(detail.draft, true);
+  assert.equal(detail.npcs.length, 0);
+  assert.match(detail.sourceNote, /月末差异/);
 });
 
 test("第二个剧本通过同一配置接口提供角色、NPC、路线和目标指标", () => {

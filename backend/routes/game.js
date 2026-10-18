@@ -7,7 +7,7 @@ import { applyAction } from "../engine/rules.js";
 import { buildReview } from "../engine/review.js";
 import { suggestScores } from "../engine/rubric.js";
 import { createInitialState, getOpeningData } from "../engine/state.js";
-import { getScript, listScripts } from "../scripts/loader.js";
+import { getScript, getScriptDetail, listScripts } from "../scripts/loader.js";
 
 const router = Router();
 const games = new Map();
@@ -55,6 +55,14 @@ router.post("/new", (req, res) => {
 });
 
 router.get("/scripts", (_req, res) => res.json({ scripts: listScripts() }));
+
+router.get("/scripts/:id/detail", (req, res) => {
+  try {
+    return res.json({ script: getScriptDetail(req.params.id) });
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+});
 
 router.post("/review", (req, res) => {
   const state = findGame(req, res);
