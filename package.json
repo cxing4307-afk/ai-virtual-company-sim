@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node backend/server.js",
     "smoke": "node backend/smoke.js",
-    "test": "node --test --test-isolation=none backend/gateway/gateway.test.js backend/engine/events.test.js backend/engine/engine.test.js backend/engine/review.test.js backend/engine/rubric.test.js backend/engine/worldinfo.test.js backend/engine/director.test.js backend/engine/state.test.js backend/prompts/prompts.test.js backend/routes/dialog.test.js backend/routes/game.test.js backend/routes/misc.test.js backend/routes/teacher-review.test.js backend/scripts/scripts.test.js backend/db.test.js backend/smoke.js backend/engine/rules.test.js"
+    "test": "node --test --test-isolation=none backend/gateway/gateway.test.js backend/engine/dmcontrol.test.js backend/engine/events.test.js backend/engine/engine.test.js backend/engine/review.test.js backend/engine/rubric.test.js backend/engine/worldinfo.test.js backend/engine/director.test.js backend/engine/state.test.js backend/prompts/prompts.test.js backend/routes/dialog.test.js backend/routes/game.test.js backend/routes/misc.test.js backend/routes/teacher-review.test.js backend/scripts/scripts.test.js backend/db.test.js backend/smoke.js backend/engine/rules.test.js"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1",

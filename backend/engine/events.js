@@ -8,6 +8,7 @@ export const EVENT_TYPES = Object.freeze({
   FINANCE_WARNING: "finance_warning",
   CLIENT_PRESSURE: "client_pressure",
   DIRECTOR_REMINDER: "director_reminder",
+  DM_INTERVENTION: "dm_intervention",
   GAME_SETTLED: "game_settled",
 });
 

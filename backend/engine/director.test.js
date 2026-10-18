@@ -67,6 +67,8 @@ test("第一幕超时时进入第二幕", () => {
   const events = advanceDirector(state, { now: getScript().acts[0].durationMs + 1 });
   assert.equal(state.currentAct, 2);
   assert.equal(events[0].data.reason, "timeout");
+  assert.equal(events[1].type, "dm_intervention");
+  assert.equal(events[1].data.scoreImpact, "none");
 });
 
 test("第二幕交方案时进入第三幕", () => {
@@ -81,6 +83,7 @@ test("第二幕超时时进入第三幕", () => {
   const events = advanceDirector(state, { now: getScript().acts[1].durationMs + 2 });
   assert.equal(state.currentAct, 3);
   assert.equal(events[0].data.reason, "research_timeout");
+  assert.equal(events[1].type, "dm_intervention");
 });
 
 test("第三幕 settle 动作触发结算", () => {

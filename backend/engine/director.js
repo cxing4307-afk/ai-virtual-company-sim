@@ -14,10 +14,10 @@ export function advanceDirector(state, { now = Date.now(), action } = {}) {
   const script = getScript(state.scriptId); const events = []; const elapsed = now - state.actStartedAt;
   if (state.currentAct === 1) {
     const ready = state.flags.problemClarified && state.flags.budgetClarified && state.flags.scheduleClarified;
-    if (ready || elapsed >= script.acts[0].durationMs) { state.currentAct = 2; state.actStartedAt = now; events.push(createEvent(EVENT_TYPES.ACT_ADVANCED, { fromAct: 1, toAct: 2, reason: ready ? "constraints_ready" : "timeout" })); }
+    if (ready || elapsed >= script.acts[0].durationMs) { state.currentAct = 2; state.actStartedAt = now; events.push(createEvent(EVENT_TYPES.ACT_ADVANCED, { fromAct: 1, toAct: 2, reason: ready ? "constraints_ready" : "timeout" })); if (!ready) events.push(createEvent(EVENT_TYPES.DM_INTERVENTION, { priority: "high", trigger: "act_timeout", action: "advance_act", stateChange: { fromAct: 1, toAct: 2 }, scoreImpact: "none" })); }
   } else if (state.currentAct === 2) {
     const submitted = action?.type === "submit_plan" || action?.payload?.phrase === "交方案";
-    if (submitted || elapsed >= script.acts[1].durationMs) { state.currentAct = 3; state.actStartedAt = now; events.push(createEvent(EVENT_TYPES.ACT_ADVANCED, { fromAct: 2, toAct: 3, reason: submitted ? "submitted" : "research_timeout" })); }
+    if (submitted || elapsed >= script.acts[1].durationMs) { state.currentAct = 3; state.actStartedAt = now; events.push(createEvent(EVENT_TYPES.ACT_ADVANCED, { fromAct: 2, toAct: 3, reason: submitted ? "submitted" : "research_timeout" })); if (!submitted) events.push(createEvent(EVENT_TYPES.DM_INTERVENTION, { priority: "high", trigger: "act_timeout", action: "advance_act", stateChange: { fromAct: 2, toAct: 3 }, scoreImpact: "none" })); }
   } else if (state.currentAct === 3 && (action?.type === "settle" || action?.type === "submit_plan")) {
     state.result = evaluateSettlement(state); state.settled = true; events.push(createEvent(EVENT_TYPES.GAME_SETTLED, state.result));
   }

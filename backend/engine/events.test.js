@@ -10,6 +10,7 @@ test("事件类型包含且仅包含预期常量", () => {
     FINANCE_WARNING: "finance_warning",
     CLIENT_PRESSURE: "client_pressure",
     DIRECTOR_REMINDER: "director_reminder",
+    DM_INTERVENTION: "dm_intervention",
     GAME_SETTLED: "game_settled",
   });
 });
