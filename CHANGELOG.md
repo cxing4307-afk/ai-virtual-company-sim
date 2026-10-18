@@ -7,6 +7,9 @@
 - CI 自动跑测试：新增 GitHub Actions，在推送到 `main` 和提交 PR 时使用 Node 20 执行 `npm ci` 与 `npm test`。
 - 新增 `CONTRIBUTING.md`，说明 Issue、PR、代码与剧本贡献方式。
 - 新增 Bug 报告、功能建议与 PR 模板，方便清楚地提交反馈和改动。
+- 测试覆盖率提升：为导演引擎（director.js，12 项）、状态模块（state.js，4 项）、Prompt 渲染与权限过滤（prompts，7 项）、对局路由（game.js，7 项）、聊天/配置路由（misc，3 项）、数据模块（db.js，4 项）补 37 项单元测试，`npm test` 从 54 涨到 91/91 全过。
+- 教师证据包导出：复盘页新增"导出/打印"按钮，一键打印；打印专用样式（单列排版、表格防跨页断裂、曲线黑白友好），页眉自动带剧本名、日期、匿名学生标识；打印前校验数据完整性。
+- 文档体系补齐：`docs/API.md`（全部 HTTP 接口对照代码核实）、`docs/ARCHITECTURE.md`（四模块分工与数据流）、`docs/DEPLOY.md`（部署指南）、`docs/FAQ.md`（10 个常见问题）。
 
 ## 2026-10-17
 
