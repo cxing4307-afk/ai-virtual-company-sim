@@ -1,0 +1,22 @@
+@media print {
+  @page { margin: 16mm; }
+  body { color: #000; background: #fff; font-size: 12pt; }
+  .app-shell { width: auto; min-height: 0; margin: 0; padding: 0; }
+  .page { display: none !important; }
+  #review-page { display: block !important; }
+  button, .button-group, #toast, footer, .text-button, .teacher-review-controls { display: none !important; }
+  .print-header[hidden] { display: block !important; margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid #000; }
+  .print-header h1 { margin: 0 0 8px; font-size: 18pt; }
+  .print-header p { margin: 3px 0; }
+  .review-heading { display: none !important; }
+  .review-grid { display: block; margin: 0; }
+  .review-card { break-inside: avoid; margin: 0 0 12px; padding: 14px; border: 1px solid #000; box-shadow: none; }
+  .review-card:nth-child(2), .review-card:last-child { grid-column: auto; }
+  #state-chart { display: block; width: 100%; height: auto; min-height: 0; overflow: visible; border-color: #000; }
+  #state-chart line, #state-chart polyline { stroke: #000 !important; stroke-width: 4 !important; }
+  #state-chart text { fill: #000 !important; font-size: 14px; }
+  .timeline, #review-dialogs, #review-dimensions, #teacher-review-list { overflow: visible; }
+  .evaluation-list { display: block; max-width: none; margin-bottom: 0; }
+  .evaluation-card { break-inside: avoid; margin: 0 0 8px; border-color: #000; }
+  .teacher-review-result { color: #000 !important; }
+}
