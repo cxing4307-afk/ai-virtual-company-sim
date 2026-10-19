@@ -1,0 +1,34 @@
+{
+  "scriptId": "gaowen",
+  "version": "2026-10-19",
+  "keyFacts": [
+    { "id": "KF-01", "描述": "连续高温导致生鲜配送车制冷不足，当前货损率约6%（待校准）", "层级": 1, "keywords": ["货损率", "6%", "制冷不足"], "dimensions": ["problem_location", "information_priority"] },
+    { "id": "KF-02", "描述": "目标是把货损率控制到2%以内（待校准）", "层级": 1, "keywords": ["2%以内", "货损目标", "货损率"], "dimensions": ["problem_location", "client_management", "solution_completeness"] },
+    { "id": "KF-03", "描述": "大功率制冷机组路线约90万、20天，可降低货损率约4.5个百分点（待校准）", "层级": 2, "keywords": ["大功率制冷机组", "90万", "20天"], "dimensions": ["solution_completeness", "constraint_awareness"] },
+    { "id": "KF-04", "描述": "车厢保温加错峰配送路线约45万、7天，可降低货损率约2.5个百分点（待校准）", "层级": 2, "keywords": ["保温与错峰", "错峰配送", "45万"], "dimensions": ["solution_completeness", "constraint_awareness"] },
+    { "id": "KF-05", "描述": "跟车检查可获得开门频次记录，并带来约0.5个百分点货损率变化（待校准）", "层级": 1, "keywords": ["跟车检查", "开门频次记录", "开门频次"], "dimensions": ["information_priority", "iteration"] },
+    { "id": "KF-06", "描述": "测试工程师掌握车厢温度曲线和货损抽检数据", "层级": 2, "keywords": ["车厢温度曲线", "货损抽检数据", "温控数据"], "dimensions": ["problem_location", "information_priority"] },
+    { "id": "KF-07", "描述": "质检工程师掌握制冷机组和保温层检验记录", "层级": 2, "keywords": ["制冷机组检验记录", "保温层检验记录", "薄弱环节"], "dimensions": ["problem_location", "information_priority"] },
+    { "id": "KF-08", "描述": "部分门店存在夜间收货窗口，需要主动提出配送调整才会获知", "层级": 3, "keywords": ["夜间收货窗口", "夜间", "配送调整"], "dimensions": ["client_management", "information_priority"] }
+  ],
+  "constraints": [
+    { "id": "CT-01", "描述": "总预算不超过120万（待校准）", "层级": 1, "keywords": ["120万", "预算"], "dimensions": ["constraint_awareness", "solution_completeness"] },
+    { "id": "CT-02", "描述": "方案须在30天内交付（待校准）", "层级": 1, "keywords": ["30天", "工期"], "dimensions": ["constraint_awareness", "client_management", "solution_completeness"] }
+  ],
+  "decisionPoints": [
+    { "id": "DP-01", "描述": "决定是否选择约90万、20天的大功率制冷机组路线（待校准）", "层级": 1, "keywords": ["大功率制冷机组", "制冷机组路线"], "dimensions": ["solution_completeness", "constraint_awareness", "iteration"] },
+    { "id": "DP-02", "描述": "决定是否选择约45万、7天的保温与错峰路线（待校准）", "层级": 1, "keywords": ["保温与错峰", "错峰配送"], "dimensions": ["solution_completeness", "constraint_awareness", "iteration"] },
+    { "id": "DP-03", "描述": "决定是否跟车检查并取得开门频次记录", "层级": 1, "keywords": ["跟车检查", "开门频次记录"], "dimensions": ["information_priority", "iteration"] }
+  ],
+  "planElements": [
+    { "id": "PE-01", "描述": "方案写明所选降损路线", "层级": 1, "keywords": ["降损路线", "大功率制冷机组", "保温与错峰"], "dimensions": ["solution_completeness"] },
+    { "id": "PE-02", "描述": "方案写明成本和工期", "层级": 1, "keywords": ["成本", "工期", "预算"], "dimensions": ["solution_completeness", "constraint_awareness"] },
+    { "id": "PE-03", "描述": "方案包含风险预案", "层级": 1, "keywords": ["风险预案", "风险"], "dimensions": ["solution_completeness", "client_management"] },
+    { "id": "PE-04", "描述": "调研温控、装卸和配送时段", "层级": 2, "keywords": ["温控", "装卸", "配送时段"], "dimensions": ["information_priority", "iteration"] }
+  ],
+  "invalidBehaviors": [
+    { "id": "IB-01", "描述": "未确认货损表现和主要热源就讨论方案", "层级": 1 },
+    { "id": "IB-02", "描述": "只听供应商说法，未交叉核实温控数据和司机现场经验", "层级": 1 },
+    { "id": "IB-03", "描述": "提交方案时缺少路线、成本、工期或风险预案", "层级": 1 }
+  ]
+}

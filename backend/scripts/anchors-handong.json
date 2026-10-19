@@ -1,0 +1,34 @@
+{
+  "scriptId": "handong",
+  "version": "2026-10-19",
+  "keyFacts": [
+    { "id": "KF-01", "描述": "50辆氢燃料电池公交车续航从400km跌到约220km（待校准）", "层级": 1, "keywords": ["400km", "220km", "续航"], "dimensions": ["problem_location", "information_priority"] },
+    { "id": "KF-02", "描述": "运营环境为-25℃的北方冬天（待校准）", "层级": 1, "keywords": ["-25℃", "低温", "北方冬天"], "dimensions": ["problem_location", "constraint_awareness"] },
+    { "id": "KF-03", "描述": "驻车预热路线约90万、20天，可提升续航约120km（待校准）", "层级": 2, "keywords": ["驻车预热", "90万", "20天"], "dimensions": ["solution_completeness", "constraint_awareness"] },
+    { "id": "KF-04", "描述": "整车保温路线约45万、7天，可提升续航约40km（待校准）", "层级": 2, "keywords": ["整车保温", "45万", "7天"], "dimensions": ["solution_completeness", "constraint_awareness"] },
+    { "id": "KF-05", "描述": "下车间可获得一线使用的土办法，并带来约15km续航变化（待校准）", "层级": 1, "keywords": ["下车间", "土办法", "车间"], "dimensions": ["information_priority", "iteration"] },
+    { "id": "KF-06", "描述": "方案目标为把续航从约220km提升到至少300km（待校准）", "层级": 1, "keywords": ["300km", "续航目标", "至少300"], "dimensions": ["problem_location", "client_management", "solution_completeness"] },
+    { "id": "KF-07", "描述": "需校准电堆-20℃衰减比例及预热模块价格、交期和效果（待校准）", "层级": 3, "keywords": ["电堆", "-20℃", "衰减比例"], "dimensions": ["problem_location", "information_priority"] },
+    { "id": "KF-08", "描述": "需校准氢瓶阀保温套与暖库停车数据（待校准）", "层级": 3, "keywords": ["氢瓶阀", "保温套", "暖库停车"], "dimensions": ["information_priority", "iteration"] }
+  ],
+  "constraints": [
+    { "id": "CT-01", "描述": "总预算不超过120万（待校准）", "层级": 1, "keywords": ["120万", "预算"], "dimensions": ["constraint_awareness", "solution_completeness"] },
+    { "id": "CT-02", "描述": "方案须在30天内交付（待校准）", "层级": 1, "keywords": ["30天", "工期"], "dimensions": ["constraint_awareness", "client_management", "solution_completeness"] }
+  ],
+  "decisionPoints": [
+    { "id": "DP-01", "描述": "决定是否选择约90万、20天的驻车预热路线（待校准）", "层级": 1, "keywords": ["驻车预热", "预热路线"], "dimensions": ["solution_completeness", "constraint_awareness", "iteration"] },
+    { "id": "DP-02", "描述": "决定是否选择约45万、7天的整车保温路线（待校准）", "层级": 1, "keywords": ["整车保温", "保温路线"], "dimensions": ["solution_completeness", "constraint_awareness", "iteration"] },
+    { "id": "DP-03", "描述": "决定是否下车间获取土办法", "层级": 1, "keywords": ["下车间", "土办法"], "dimensions": ["information_priority", "iteration"] }
+  ],
+  "planElements": [
+    { "id": "PE-01", "描述": "方案写明所选技术路线", "层级": 1, "keywords": ["技术路线", "驻车预热", "整车保温"], "dimensions": ["solution_completeness"] },
+    { "id": "PE-02", "描述": "方案写明成本和工期", "层级": 1, "keywords": ["成本", "工期", "预算"], "dimensions": ["solution_completeness", "constraint_awareness"] },
+    { "id": "PE-03", "描述": "方案包含风险预案", "层级": 1, "keywords": ["风险预案", "风险"], "dimensions": ["solution_completeness", "client_management"] },
+    { "id": "PE-04", "描述": "先确认问题、预算与工期三条红线", "层级": 2, "keywords": ["问题", "预算", "工期"], "dimensions": ["problem_location", "constraint_awareness"] }
+  ],
+  "invalidBehaviors": [
+    { "id": "IB-01", "描述": "未确认续航变化幅度和主因就讨论方案", "层级": 1 },
+    { "id": "IB-02", "描述": "选择路线时未同时考虑预算与工期红线", "层级": 1 },
+    { "id": "IB-03", "描述": "提交方案时缺少技术路线、成本、工期或风险预案", "层级": 1 }
+  ]
+}
