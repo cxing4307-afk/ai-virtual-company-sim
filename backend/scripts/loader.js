@@ -42,7 +42,7 @@ export function getCard(cardId) {
 
 const scripts = new Map(
   fs.readdirSync(directory)
-    .filter((name) => name.endsWith(".json") && name !== "seeds.json")
+    .filter((name) => name.endsWith(".json") && name !== "seeds.json" && !name.startsWith("anchors-"))
     .sort()
     .map((name) => {
       const raw = JSON.parse(fs.readFileSync(path.join(directory, name), "utf8"));
@@ -81,6 +81,35 @@ export function getScript(scriptId = DEFAULT_SCRIPT_ID) {
   const script = scripts.get(scriptId);
   if (!script) throw new Error(`未知剧本：${scriptId}`);
   return script;
+}
+
+const anchorArrayFields = ["keyFacts", "constraints", "decisionPoints", "planElements", "invalidBehaviors"];
+
+const emptyAnchors = (scriptId) => Object.freeze({
+  scriptId,
+  version: "",
+  keyFacts: [],
+  constraints: [],
+  decisionPoints: [],
+  planElements: [],
+  invalidBehaviors: [],
+});
+
+/** 按剧本读取评价锚点；未知剧本或缺少文件时返回空表。 */
+export function getAnchors(scriptId) {
+  if (!scripts.has(scriptId)) return emptyAnchors(scriptId);
+  const anchorsPath = path.join(directory, `anchors-${scriptId}.json`);
+  if (!fs.existsSync(anchorsPath)) return emptyAnchors(scriptId);
+  const anchors = JSON.parse(fs.readFileSync(anchorsPath, "utf8"));
+  for (const field of anchorArrayFields) {
+    if (!Array.isArray(anchors[field])) throw new Error(`锚点表 ${scriptId} 缺少数组字段 ${field}`);
+    for (const item of anchors[field]) {
+      if (typeof item?.id !== "string" || !item.id.trim() || typeof item?.描述 !== "string" || !item.描述.trim() || ![1, 2, 3].includes(item.层级)) {
+        throw new Error(`锚点表 ${scriptId}.${field} 含无效项目`);
+      }
+    }
+  }
+  return Object.freeze(anchors);
 }
 
 /** 首页只需要轻量元信息，避免把 NPC 提示词发送到浏览器。 */

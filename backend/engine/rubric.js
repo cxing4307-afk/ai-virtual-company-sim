@@ -1,3 +1,5 @@
+import { getAnchors } from "../scripts/loader.js";
+
 /** 《寒冬订单》过程性评价量规；分数为教师复核前的规则建议。 */
 export const RUBRIC = {
   version: "2026-10-16",
@@ -69,6 +71,17 @@ export function suggestScores(state) {
   const flags = state?.flags ?? {};
   const decisionText = decisions.map(textOf).join(" ");
   const obtainedText = [...(state?.unlockedInformation ?? []), flags.workshopVisited ? "现场走访" : ""].join(" ");
+  let anchors;
+  try {
+    anchors = getAnchors(state?.scriptId);
+  } catch {
+    anchors = { keyFacts: [], constraints: [], decisionPoints: [], planElements: [], invalidBehaviors: [] };
+  }
+  const anchorText = `${obtainedText} ${decisionText}`.toLocaleLowerCase();
+  const scopedAnchors = [anchors.keyFacts, anchors.constraints, anchors.decisionPoints, anchors.planElements].flat();
+  const matchedAnchorIds = new Set(scopedAnchors
+    .filter((anchor) => anchor.keywords?.some((keyword) => anchorText.includes(String(keyword).toLocaleLowerCase())))
+    .map((anchor) => anchor.id));
   const usedFacts = FACTS.filter(([name]) => contains(obtainedText, name) && contains(decisionText, name)).map(([name]) => name);
   const factEvidence = usedFacts.map((name) => `已获得并在决策中使用“${name}”关键事实`);
   const workshopVisited = Boolean(flags.workshopVisited) || hasType(all, "visit_workshop");
@@ -103,6 +116,10 @@ export function suggestScores(state) {
       client_management: !contactedClient,
       iteration: effectiveIterations < 2 || usedFacts.length === 0,
     })[item.key];
-    return { key: item.key, name: item.name, weight: item.weight, score, band: bandFor(score), evidence, needsTeacherReview: insufficient || (score >= 68 && score <= 72) || (score >= 83 && score <= 87) };
+    const dimensionAnchors = scopedAnchors.filter((anchor) => anchor.dimensions?.includes(item.key));
+    const formatAnchor = (anchor) => `${anchor.id}：${anchor.描述}`;
+    const anchorBasis = dimensionAnchors.filter((anchor) => matchedAnchorIds.has(anchor.id)).map(formatAnchor);
+    const uncoveredAnchors = dimensionAnchors.filter((anchor) => anchor.层级 === 1 && !matchedAnchorIds.has(anchor.id)).map(formatAnchor);
+    return { key: item.key, name: item.name, weight: item.weight, score, band: bandFor(score), evidence, needsTeacherReview: insufficient || (score >= 68 && score <= 72) || (score >= 83 && score <= 87), anchorBasis, uncoveredAnchors };
   });
 }
