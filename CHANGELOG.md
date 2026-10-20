@@ -1,5 +1,10 @@
 # 更新日志
 
+## 2026-10-20
+
+### 新增
+- 为配置路由（`backend/routes/config.js` 的 `POST /key` 与 `getRuntimeApiKey`）补 8 项单元测试（`backend/routes/config.test.js`）：合法密钥设置、首尾空格 trim、缺失/空/纯空格/非字符串四种非法输入被拒绝且旧密钥不受影响、初始为空、重新设置覆盖旧值；同时把新测试文件加入 `package.json` 的 `test` 脚本。`npm test` 125/125 全过。
+
 ## 2026-10-19
 
 ### 新增
