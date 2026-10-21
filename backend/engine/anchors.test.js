@@ -74,3 +74,50 @@ test("新增锚点字段不改变建议分的既有字段契约", () => {
   assert.ok(Array.isArray(dimension.anchorBasis));
   assert.ok(Array.isArray(dimension.uncoveredAnchors));
 });
+
+test("未锁定唯一成因不因结论措辞被隐性扣分", () => {
+  const sharedState = {
+    scriptId: "handong",
+    unlockedInformation: [
+      "实测续航从400km降至220km，低温环境为-25℃",
+      "驻车预热路线约90万、20天，可改善低温续航",
+    ],
+    flags: {
+      problemClarified: true,
+      budgetClarified: true,
+      scheduleClarified: true,
+      workshopVisited: true,
+    },
+    decisionHistory: [
+      { type: "choose_preheat", payload: { contentSummary: "核对续航、氢耗、加氢与保温条件，并比较驻车预热的预算和工期" } },
+      { type: "choose_preheat", payload: { contentSummary: "基于低温下续航和氢耗变化，评估驻车预热路线的90万、20天安排" } },
+    ],
+    behaviorRecords: [{ type: "communicate", targetNpc: "wang_manager", contentSummary: "向甲方同步低温续航与加氢保障的核查进度" }],
+  };
+  const pathA = suggestScores({
+    ...sharedState,
+    decisionHistory: [...sharedState.decisionHistory, { type: "choose_preheat", payload: { contentSummary: "已锁定唯一成因：低温导致氢耗上升，执行驻车预热路线" } }],
+  });
+  const pathB = suggestScores({
+    ...sharedState,
+    decisionHistory: [...sharedState.decisionHistory, { type: "choose_preheat", payload: { contentSummary: "证据不足以锁定唯一成因，暂缓调整、升级处置并保留未决项" } }],
+  });
+
+  assert.deepEqual(pathA.map((item) => item.score), pathB.map((item) => item.score), "两条路径的六维建议分应逐项相等");
+  assert.deepEqual(
+    pathA.map((item) => [...new Set(item.anchorBasis)].sort()),
+    pathB.map((item) => [...new Set(item.anchorBasis)].sort()),
+    "结论措辞不应改变各维度命中的锚点集合",
+  );
+  assert.deepEqual(
+    pathA.map((item) => [...new Set(item.uncoveredAnchors)].sort()),
+    pathB.map((item) => [...new Set(item.uncoveredAnchors)].sort()),
+    "结论措辞不应改变各维度未覆盖锚点集合",
+  );
+  for (const path of [pathA, pathB]) {
+    for (const key of ["problem_location", "information_priority"]) {
+      const dimension = path.find((item) => item.key === key);
+      assert.ok(dimension.anchorBasis.some((anchor) => anchor.startsWith("KF-01：")), `${key} 应命中 KF-01 层级1锚点`);
+    }
+  }
+});
